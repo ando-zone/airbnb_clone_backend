@@ -13,11 +13,18 @@ def categories(request):
         serializer = CategorySerializer(all_categories, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
-        Category.objects.create(
-            name=request.data["name"],
-            kind=request.data["kind"],
-        )
-        return Response({"created": True})
+        # 사용자를 100%로 신뢰하는 경우. 잘못 되었을 경우, 에러 발생.
+        # Category.objects.create(
+        #     name=request.data["name"],
+        #     kind=request.data["kind"],
+        # )
+        # return Response({"created": True})
+
+        serializer = CategorySerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"created": True})
+        else:
+            return Response(serializer.errors)
 
     # Version 1)
     # all_categories = Category.objects.all()
