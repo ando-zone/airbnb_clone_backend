@@ -7,7 +7,7 @@ class CategorySerializer(serializers.Serializer):
     class Meta:
         model = Category
         # TODO@Ando: fields = "__all__"의 의미는 무엇일까?
-        fields = "__all__"
+        fields = '__all__'
 
     # Version 1)
     # pk = serializers.IntegerField(read_only=True)
