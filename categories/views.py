@@ -23,7 +23,12 @@ def categories(request):
         # 사용자에 의존하지 않음. 에러 발생시키지 않고 JSON response로 잘못 입력했음을 알려줌.
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
-            return Response({"created": True})
+            # return Response({"created": True})
+            # .save()가 적절하게 create하거나 update 함.
+            new_category = serializer.save()
+            return Response(
+                CategorySerializer(new_category).data,
+            )
         else:
             return Response(serializer.errors)
 
