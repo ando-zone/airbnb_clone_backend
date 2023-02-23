@@ -2,12 +2,12 @@ from rest_framework import serializers
 from .models import Category
 
 
-class CategorySerializer(serializers.Serializer):
+class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        # TODO@Ando: fields = "__all__"의 의미는 무엇일까?
         fields = '__all__'
+        # TODO@Ando: fields = "__all__"의 의미는 무엇일까?
 
     # Version 1)
     # pk = serializers.IntegerField(read_only=True)
