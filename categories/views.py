@@ -20,6 +20,7 @@ def categories(request):
         # )
         # return Response({"created": True})
 
+        # 사용자에 의존하지 않음. 에러 발생시키지 않고 JSON response로 잘못 입력했음을 알려줌.
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
             return Response({"created": True})
