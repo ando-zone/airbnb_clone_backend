@@ -25,4 +25,5 @@ urlpatterns = [
     # API 답게 URL 바꿔줌.
     path("api/v1/rooms/", include("rooms.urls")),
     path("api/v1/categories/", include("categories.urls")),
+    path("api/v1/experiences/", include("experiences.urls")),
 ]
