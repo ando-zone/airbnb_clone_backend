@@ -7,4 +7,7 @@ from . import views
 #     path("<int:room_pk>", views.see_one_room),
 # ]
 
-urlpatterns = []
+urlpatterns = [
+    path("amenities/", views.Amenities.as_view()),
+    path("amenities/<int:pk>", views.AmenityDetail.as_view()),
+]
