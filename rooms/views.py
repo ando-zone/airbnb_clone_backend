@@ -1,6 +1,7 @@
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError
+from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError, PermissionDenied
 from rest_framework.status import HTTP_204_NO_CONTENT
 from .models import Amenity, Room
 from categories.models import Category
@@ -78,31 +79,21 @@ class Rooms(APIView):
             except Category.DoesNotExist:
                 raise ParseError("Category not found")
 
-            # room = serializer.save(
-            #     owner=request.user,
-            #     category=category
-            # )
-
-            amenity_list = list()
-            amenities = request.data.get("amenities")
-            for amenity_pk in amenities:
-                try:
-                    amenity = Amenity.objects.get(pk=amenity_pk)
-                except Amenity.DoesNotExist:
-                    # TODO@Ando: room을 delete할지, 우선 등록 후 수정하도록 유도할지는 생각해 봐야할 문제.
-                    room.delete()
-                    raise ParseError(f"Amenity with id {amenity_pk} not found.")
-                # room.amenities.add(amenity)
-                amenity_list.append(amenity)
-
-            room = serializer.save(
-                owner=request.user,
-                category=category,
-                amenities=amenity_list
-            )
-
-            serializer = RoomDetailSerializer(room)
-            return Response(serializer.data)
+            # 아래가 좋은 코드인지 잘 모르겠다. 예외처리가 우선 분명하지 않고 indentation이 과도하게 많음.
+            try:
+                with transaction.atomic():
+                    room = serializer.save(
+                        owner=request.user,
+                        category=category,
+                    )
+                    amenities = request.data.get("amenities")
+                    for amenity_pk in amenities:
+                        amenity = Amenity.objects.get(pk=amenity_pk)
+                        room.amenities.add(amenity)
+                    serializer = RoomDetailSerializer(room)
+                    return Response(serializer.data)
+            except Exception:
+                raise ParseError("Amenity not found")
         else:
             return Response(serializer.errors)
 
@@ -119,3 +110,60 @@ class RoomDetail(APIView):
 
         return Response(serializer.data)
 
+    def put(self, request, pk):
+        room = self.get_object(pk)
+        
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+
+        if room.owner != request.user:
+            raise PermissionDenied
+
+        # TODO@Ando: code challenge with 'partial update' function
+        serializer = RoomDetailSerializer(room, data=request.data, partial=True)
+        if serializer.is_valid():
+            category = None
+            category_pk = request.data.get("category")
+
+            if category_pk:
+                try:
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError("The category kind should be 'rooms'.")
+                except Category.DoesNotExist:
+                    raise ParseError("Category not found")
+
+            # 아래가 좋은 코드인지 잘 모르겠다. 예외처리가 우선 분명하지 않고 indentation이 과도하게 많음.
+            try:
+                with transaction.atomic():
+                    room = serializer.save(owner=request.user)
+
+                    if category is not None:
+                        room = serializer.save(category=category)
+
+                    amenities = request.data.get("amenities")
+
+                    if amenities:
+                        for amenity_pk in amenities:
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+
+                    serializer = RoomDetailSerializer(room)
+                    return Response(serializer.data)
+            except Exception:
+                raise ParseError("Amenity not found")
+        else:
+            return Response(serializer.errors)
+
+    def delete(self, request, pk):
+        room = self.get_object(pk)
+
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+
+        if room.owner != request.user:
+            raise PermissionDenied
+
+        room.delete()
+
+        return Response(status=HTTP_204_NO_CONTENT)
