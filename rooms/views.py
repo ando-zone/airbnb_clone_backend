@@ -88,6 +88,7 @@ class Rooms(APIView):
                 try:
                     amenity = Amenity.objects.get(pk=amenity_pk)
                 except Amenity.DoesNotExist:
+                    # TODO@Ando: room을 delete할지, 우선 등록 후 수정하도록 유도할지는 생각해 봐야할 문제.
                     room.delete()
                     raise ParseError(f"Amenity with id {amenity_pk} not found.")
                 room.amenities.add(amenity)
