@@ -106,7 +106,7 @@ class RoomDetail(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk)
-        serializer = RoomDetailSerializer(room,  context={"request": request})
+        serializer = RoomDetailSerializer(room, context={"request": request})
 
         return Response(serializer.data)
 
@@ -120,7 +120,7 @@ class RoomDetail(APIView):
             raise PermissionDenied
 
         # TODO@Ando: code challenge with 'partial update' function
-        serializer = RoomDetailSerializer(room, data=request.data, partial=True)
+        serializer = RoomDetailSerializer(room, data=request.data, partial=True, context={"request": request})
         if serializer.is_valid():
             category = None
             category_pk = request.data.get("category")
@@ -133,7 +133,9 @@ class RoomDetail(APIView):
                 except Category.DoesNotExist:
                     raise ParseError("Category not found")
 
+            # TODO@Ando: try, except 구조 변경하기.
             # 아래가 좋은 코드인지 잘 모르겠다. 예외처리가 우선 분명하지 않고 indentation이 과도하게 많음.
+            # 역시나... 예외처리가 불분명함. context 때문에 발생한 에러인데 파악하기가 어려움.
             try:
                 with transaction.atomic():
                     room = serializer.save(owner=request.user)
@@ -148,7 +150,7 @@ class RoomDetail(APIView):
                             amenity = Amenity.objects.get(pk=amenity_pk)
                             room.amenities.add(amenity)
 
-                    serializer = RoomDetailSerializer(room)
+                    serializer = RoomDetailSerializer(room, context={"request": request})
                     return Response(serializer.data)
             except Exception:
                 raise ParseError("Amenity not found")
