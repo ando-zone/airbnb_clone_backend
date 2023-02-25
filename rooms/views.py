@@ -78,11 +78,12 @@ class Rooms(APIView):
             except Category.DoesNotExist:
                 raise ParseError("Category not found")
 
-            room = serializer.save(
-                owner=request.user,
-                category=category
-            )
+            # room = serializer.save(
+            #     owner=request.user,
+            #     category=category
+            # )
 
+            amenity_list = list()
             amenities = request.data.get("amenities")
             for amenity_pk in amenities:
                 try:
@@ -91,7 +92,14 @@ class Rooms(APIView):
                     # TODO@Ando: room을 delete할지, 우선 등록 후 수정하도록 유도할지는 생각해 봐야할 문제.
                     room.delete()
                     raise ParseError(f"Amenity with id {amenity_pk} not found.")
-                room.amenities.add(amenity)
+                # room.amenities.add(amenity)
+                amenity_list.append(amenity)
+
+            room = serializer.save(
+                owner=request.user,
+                category=category,
+                amenities=amenity_list
+            )
 
             serializer = RoomDetailSerializer(room)
             return Response(serializer.data)

@@ -40,3 +40,4 @@ class RoomDetailSerializer(ModelSerializer):
     # 해줘야할 것은 serializer.save()를 호출할 때 데이터를 추가해주는 것이다.
     # def create(self, validated_data):
     #     return Room.objects.create(**validated_data)
+
