@@ -3,6 +3,7 @@ from rest_framework.serializers import SerializerMethodField
 from .models import Amenity, Room
 from users.serializers import TinyUserSerializer
 from reviews.serializers import ReviewSerializer
+from medias.serializers import PhotoSerializer
 from categories.serializers import CategorySerializer
 
 
@@ -18,6 +19,7 @@ class AmenitySerializer(ModelSerializer):
 class RoomListSerializer(ModelSerializer):
     rating = SerializerMethodField()
     is_owner = SerializerMethodField()
+    photos = PhotoSerializer(many=True, read_only=True)
 
     class Meta:
         model=Room
@@ -28,7 +30,8 @@ class RoomListSerializer(ModelSerializer):
             "city",
             "price",
             "rating",
-            "is_owner"
+            "is_owner",
+            "photos"
         )
 
     # 이처럼 DB에 없는 속성이라도 API를 통해 표현할 수 있음.
@@ -46,6 +49,7 @@ class RoomDetailSerializer(ModelSerializer):
     category = CategorySerializer(read_only=True)
     rating = SerializerMethodField()
     is_owner = SerializerMethodField()
+    photos = PhotoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Room
