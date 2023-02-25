@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError, PermissionDenied
 from rest_framework.status import HTTP_204_NO_CONTENT
+from reviews.serializers import ReviewSerializer
 from .models import Amenity, Room
 from categories.models import Category
 from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
@@ -26,6 +27,7 @@ class Amenities(APIView):
                 return Response(serializer.errors)
         else:
             raise NotAuthenticated
+
 
 #/api/v1/rooms/amenities/1
 class AmenityDetail(APIView):
@@ -96,6 +98,7 @@ class Rooms(APIView):
                 raise ParseError("Amenity not found")
         else:
             return Response(serializer.errors)
+
 
 class RoomDetail(APIView):
     def get_object(self, pk):
@@ -169,3 +172,28 @@ class RoomDetail(APIView):
         room.delete()
 
         return Response(status=HTTP_204_NO_CONTENT)
+
+
+class RoomReviews(APIView):
+    def get_object(self, pk):
+        try:
+            return Room.objects.get(pk=pk)
+        except Room.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        try:
+            # TODO@Ando: page가 마지막 페이지를 넘어가면 마지막 페이지를 보여주는 것도 좋을 것 같다.
+            page = request.query_params.get("page", 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+        page_size = 3
+        start = (page - 1) * page_size
+        end = start + page_size
+        room = self.get_object(pk)
+        serializer = ReviewSerializer(
+            room.reviews.all()[start:end],
+            many=True,
+        )
+        return Response(serializer.data)
