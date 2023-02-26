@@ -316,6 +316,7 @@ class RoomBookings(APIView):
             year, month = year_month.split("_")
             date_range = getMonthRange(int(year), int(month))
 
+        # TODO@Ando: 근데 date_range로 찾을 때는 check_in__gt 기능이 활성화되면 안될 것 같다. 나중에 수정하기.
         bookings = Booking.objects.filter(
             room=room,
             kind=Booking.BookingKindChoices.ROOM,
