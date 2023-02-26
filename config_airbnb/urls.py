@@ -29,4 +29,6 @@ urlpatterns = [
     path("api/v1/categories/", include("categories.urls")),
     path("api/v1/experiences/", include("experiences.urls")),
     path("api/v1/medias/", include("medias.urls")),
+    # 맨 끝에 슬래시("/") 적어주는 것 매우 중요함.
+    path("api/v1/wishlists/", include("wishlists.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
