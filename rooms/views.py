@@ -15,6 +15,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from bookings.models import Booking
 from bookings.serializers import PublicBookingSerializer
 
+
 #/api/v1/rooms/amenities
 class Amenities(APIView):
     def get(self, request):
@@ -273,6 +274,16 @@ class RoomPhotos(APIView):
         else:
             return Response(serializer.errors)
 
+from datetime import datetime, timedelta
+from dateutil import relativedelta
+
+def getMonthRange(year, month):
+    this_month_1st_day = datetime(year=year, month=month, day=1).date()
+    next_month_1st_day = this_month_1st_day + relativedelta.relativedelta(months=1)
+
+    this_month_last_day = next_month_1st_day - timedelta(days=1)
+
+    return (this_month_1st_day, this_month_last_day)
 
 class RoomBookings(APIView):
 
@@ -285,11 +296,30 @@ class RoomBookings(APIView):
             raise NotFound
 
     def get(self, request, pk):
+        today_date = timezone.now().today()
+        today_Y_M = f"{today_date.year}_{today_date.month}"
+
+        try:
+            today_date = timezone.now().today()
+            today_Y_M = f"{today_date.year}_{today_date.month}"
+            year_month = request.query_params.get("year_month", "No_input")
+
+        except ValueError:
+            year_month = "Wrong_input"
+
         room = self.get_object(pk)
         now = timezone.localtime(timezone.now()).date()
+
+        if year_month == "No_input" or year_month == "Wrong_input":
+            date_range = (datetime.min, datetime.max)
+        else:
+            year, month = year_month.split("_")
+            date_range = getMonthRange(int(year), int(month))
+
         bookings = Booking.objects.filter(
             room=room,
             kind=Booking.BookingKindChoices.ROOM,
+            check_in__range = date_range,
             check_in__gt=now,
         )
         serializer = PublicBookingSerializer(bookings, many=True)
