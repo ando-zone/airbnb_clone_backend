@@ -5,6 +5,12 @@ from common.models import CommonModel
 class Wishlist(CommonModel):
 
     """Wishlist Model Definition"""
+    # TODO@Ando: 아래 궁금한 점 해결되지 않음.
+    # 11.23 니꼬의 강의를 들어보면 아래와 같이 이해하면 안되는 것 같음. ModelSerializer가
+    # 그냥 자동으로 blank=True null=True가 아니면 필수라고 생각해야 하는데...
+    # 왜 user가 방 이름을 지정하지 않아도 등록이 되었던 걸까??? 궁금함.
+    # 아 오케이 해결됨... 일단 11.23 강의를 잘 들어볼 것.
+
     # TODO@Ando: 궁금한 점. (해결)
     # 여기서 rooms나 experiences는 빈 값? 허용 옵션이 없어서 admin panel에서 추가할 경우,
     # 반드시 값을 같이 줘야 함. --> 이거는 db와는 상관 없이 admin_panel에게 주는 약속 혹은 규칙 같은 것이다.
