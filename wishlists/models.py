@@ -10,6 +10,7 @@ class Wishlist(CommonModel):
     # 그냥 자동으로 blank=True null=True가 아니면 필수라고 생각해야 하는데...
     # 왜 user가 방 이름을 지정하지 않아도 등록이 되었던 걸까??? 궁금함.
     # 아 오케이 해결됨... 일단 11.23 강의를 잘 들어볼 것.
+    # rooms.views.RoomBooking에 TODO@Ando 참조해보기.
 
     # TODO@Ando: 궁금한 점. (해결)
     # 여기서 rooms나 experiences는 빈 값? 허용 옵션이 없어서 admin panel에서 추가할 경우,

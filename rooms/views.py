@@ -332,7 +332,7 @@ class RoomBookings(APIView):
         if serializer.is_valid():
             booking = serializer.save(
                 room=room,
-                user=request.user, # user는 주석처리하면 DB 상에 저장이 안됨. (on_delete가 cascade인 것과 관련이 있을지도.)
+                user=request.user, # TODO@Ando: user는 주석처리하면 DB 상에 저장이 안됨. (on_delete가 cascade인 것과 관련이 있을지도.)
                 kind=Booking.BookingKindChoices.ROOM,
             )
             serializer = PublicBookingSerializer(booking)
