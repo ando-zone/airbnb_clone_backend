@@ -37,6 +37,8 @@ class Room(CommonModel):
         max_length=20,
         choices=RoomKindChoices.choices,
     )
+    # 여기서 user는 owner를 뜻함. 예약자가 아님. 그래서 one to many입니다.
+    # booking 그리고 그 안에 포함된 booker와 헷갈리면 안됩니다.
     owner = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
