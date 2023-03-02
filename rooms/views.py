@@ -4,26 +4,38 @@ from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, NotAuthenticated, ParseError, PermissionDenied
+from rest_framework.exceptions import (
+    NotFound,
+    NotAuthenticated,
+    ParseError,
+    PermissionDenied,
+)
 from rest_framework.status import HTTP_204_NO_CONTENT
 from reviews.serializers import ReviewSerializer
 from .models import Amenity, Room
 from categories.models import Category
-from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
+from .serializers import (
+    AmenitySerializer,
+    RoomListSerializer,
+    RoomDetailSerializer,
+)
 from medias.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from bookings.models import Booking
-from bookings.serializers import PublicBookingSerializer, CreateRoomBookingSerializer
+from bookings.serializers import (
+    PublicBookingSerializer,
+    CreateRoomBookingSerializer,
+)
 
 
-#/api/v1/rooms/amenities
+# /api/v1/rooms/amenities
 class Amenities(APIView):
     def get(self, request):
         all_amenities = Amenity.objects.all()
         serializer = AmenitySerializer(all_amenities, many=True)
 
         return Response(serializer.data)
-    
+
     def post(self, request):
         if request.user.is_authenticated:
             serializer = AmenitySerializer(data=request.data)
@@ -36,7 +48,7 @@ class Amenities(APIView):
             raise NotAuthenticated
 
 
-#/api/v1/rooms/amenities/1
+# /api/v1/rooms/amenities/1
 class AmenityDetail(APIView):
     def get_object(self, pk):
         try:
@@ -73,7 +85,9 @@ class Rooms(APIView):
 
     def get(self, request):
         all_rooms = Room.objects.all()
-        serializer = RoomListSerializer(all_rooms, many=True, context={"request": request})
+        serializer = RoomListSerializer(
+            all_rooms, many=True, context={"request": request}
+        )
 
         return Response(serializer.data)
 
@@ -128,7 +142,7 @@ class RoomDetail(APIView):
 
     def put(self, request, pk):
         room = self.get_object(pk)
-        
+
         # if not request.user.is_authenticated:
         #     raise NotAuthenticated
 
@@ -136,7 +150,9 @@ class RoomDetail(APIView):
             raise PermissionDenied
 
         # TODO@Ando: code challenge with 'partial update' function
-        serializer = RoomDetailSerializer(room, data=request.data, partial=True, context={"request": request})
+        serializer = RoomDetailSerializer(
+            room, data=request.data, partial=True, context={"request": request}
+        )
         if serializer.is_valid():
             category = None
             category_pk = request.data.get("category")
@@ -144,7 +160,10 @@ class RoomDetail(APIView):
             if category_pk:
                 try:
                     category = Category.objects.get(pk=category_pk)
-                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                    if (
+                        category.kind
+                        == Category.CategoryKindChoices.EXPERIENCES
+                    ):
                         raise ParseError("The category kind should be 'rooms'.")
                 except Category.DoesNotExist:
                     raise ParseError("Category not found")
@@ -166,7 +185,9 @@ class RoomDetail(APIView):
                             amenity = Amenity.objects.get(pk=amenity_pk)
                             room.amenities.add(amenity)
 
-                    serializer = RoomDetailSerializer(room, context={"request": request})
+                    serializer = RoomDetailSerializer(
+                        room, context={"request": request}
+                    )
                     return Response(serializer.data)
             except Exception:
                 raise ParseError("Amenity not found")
@@ -251,7 +272,7 @@ class RoomAmenities(APIView):
 
 
 class RoomPhotos(APIView):
-    
+
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -274,16 +295,21 @@ class RoomPhotos(APIView):
         else:
             return Response(serializer.errors)
 
+
 from datetime import datetime, timedelta
 from dateutil import relativedelta
 
+
 def getMonthRange(year, month):
     this_month_1st_day = datetime(year=year, month=month, day=1).date()
-    next_month_1st_day = this_month_1st_day + relativedelta.relativedelta(months=1)
+    next_month_1st_day = this_month_1st_day + relativedelta.relativedelta(
+        months=1
+    )
 
     this_month_last_day = next_month_1st_day - timedelta(days=1)
 
     return (this_month_1st_day, this_month_last_day)
+
 
 class RoomBookings(APIView):
 
@@ -320,7 +346,7 @@ class RoomBookings(APIView):
         bookings = Booking.objects.filter(
             room=room,
             kind=Booking.BookingKindChoices.ROOM,
-            check_in__range = date_range,
+            check_in__range=date_range,
             check_in__gt=now,
         )
         serializer = PublicBookingSerializer(bookings, many=True)
@@ -332,7 +358,7 @@ class RoomBookings(APIView):
         if serializer.is_valid():
             booking = serializer.save(
                 room=room,
-                user=request.user, # TODO@Ando: user는 주석처리하면 DB 상에 저장이 안됨. (on_delete가 cascade인 것과 관련이 있을지도.)
+                user=request.user,  # TODO@Ando: user는 주석처리하면 DB 상에 저장이 안됨. (on_delete가 cascade인 것과 관련이 있을지도.)
                 kind=Booking.BookingKindChoices.ROOM,
             )
             serializer = PublicBookingSerializer(booking)
