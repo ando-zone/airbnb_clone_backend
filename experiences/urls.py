@@ -5,6 +5,9 @@ from .views import (
     Experiences,
     ExperienceDetail,
     ExperiencePerks,
+    ExperienceReviews,
+    ExperiencePhotos,
+    ExperienceBookings
 )
 
 
@@ -14,7 +17,7 @@ urlpatterns = [
     path("<int:pk>/perks", ExperiencePerks.as_view()),
     path("perks/", Perks.as_view()),
     path("perks/<int:pk>", PerkDetail.as_view()),
-    # path("<int:pk>/reviews", views.RoomReviews.as_view()),
-    # path("<int:pk>/photos", views.RoomPhotos.as_view()),
-    # path("<int:pk>/bookings", views.RoomBookings.as_view()),
+    path("<int:pk>/reviews", ExperienceReviews.as_view()),
+    path("<int:pk>/photos", ExperiencePhotos.as_view()),
+    path("<int:pk>/bookings", ExperienceBookings.as_view()),
 ]
