@@ -10,7 +10,7 @@ from rest_framework.exceptions import (
     ParseError,
     PermissionDenied,
 )
-from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 from reviews.serializers import ReviewSerializer
 from .models import Amenity, Room
 from categories.models import Category
@@ -37,15 +37,16 @@ class Amenities(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        if request.user.is_authenticated:
-            serializer = AmenitySerializer(data=request.data)
-            if serializer.is_valid():
-                amenity = serializer.save(owner=request.user)
-                return Response(AmenitySerializer(amenity).data)
-            else:
-                return Response(serializer.errors)
+        # TODO@Ando: authenticated 유저만 사용가능한지 테스트 하는 방법은?
+        # if request.user.is_authenticated:
+        serializer = AmenitySerializer(data=request.data)
+        if serializer.is_valid():
+            amenity = serializer.save()
+            return Response(AmenitySerializer(amenity).data)
         else:
-            raise NotAuthenticated
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        # else:
+        #     raise NotAuthenticated
 
 
 # /api/v1/rooms/amenities/1
