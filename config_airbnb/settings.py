@@ -154,5 +154,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "config_airbnb.authentication.TrustMeBroAuthentication",
         "rest_framework.authentication.TokenAuthentication",
+        "config_airbnb.authentication.JWTAuthentication",
     ]
 }
